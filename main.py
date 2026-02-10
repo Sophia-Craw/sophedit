@@ -1,38 +1,57 @@
+import sys, os
+from pathlib import Path
 from textual.app import App, ComposeResult
 from textual.containers import HorizontalGroup
-from textual.widgets import Footer, Header, TextArea, Input, Button
+from textual.widgets import Footer, Header, TextArea, Input, Button, Static
 
-class SaveDialog(HorizontalGroup):
-    def compose(self):
-        yield Input(placeholder="Filename", id="txt-filename")
-        yield Button("Save", id="btn-save")
+def file_eixsts(f):
+    if f:
+        file = Path("./" + f)
+        return file.is_file()
+    else:
+        return False
 
-    def _on_key(self, event):
-        if event.key == "ctrl+s":
-            self.screen.styles.display = "block"
+def file_contents(f):
+    if f:
+        with open(str("./" + f), "r") as file:
+            return file.read()
+    else:
+        return ""
+
+
+FILE = ("Untitled" if not len(sys.argv) > 1 else sys.argv[1])
+TEXT = ("" if not file_eixsts(FILE) else file_contents(FILE))
 
 class SophEditor(App):
 
     CSS_PATH = "./style.toss"
-    BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
 
     def compose(self) -> ComposeResult:
-        yield Header(name="SophEditor")
-        yield TextArea(language="cpp", show_line_numbers=True, )
-        yield SaveDialog()
-        yield Footer()
+        yield Header(name="SophEditor - Untitled")
+        yield Static(FILE + "*", id="status")
 
-    def action_toggle_dark(self) -> None:
-        self.theme = (
-            "textual-dark" if self.theme == "textual-light" else "textual-light"
-        )
+        editor = TextArea(language="python", show_line_numbers=True, id="text-editor")
+        editor.tab_behavior = "indent"
+        editor.text = TEXT
+        yield editor
+        yield Footer(Static("Ctrl+S | Save"), Static("Ctrl+C | Exit"))
 
     def _on_key(self, event):
+        self.query_one("#status").update(FILE + "*")
+
         if event.key == "ctrl+c":
             self.exit()
 
+        if event.key == "ctrl+s":
+            with open(str("./" + FILE), "w") as file:
+                file.write(self.query_one("#text-editor").text)
+                self.query_one("#status").update(FILE)
+                file.close()
+
+
 
 if __name__ == "__main__":
+
     app = SophEditor()
     app.theme = "dracula"
     app.run()
