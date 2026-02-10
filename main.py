@@ -1,7 +1,6 @@
 import sys, os
 from pathlib import Path
 from textual.app import App, ComposeResult
-from textual.containers import HorizontalGroup
 from textual.widgets import Footer, Header, TextArea, Input, Button, Static
 
 def file_eixsts(f):
@@ -34,7 +33,8 @@ class SophEditor(App):
         editor.tab_behavior = "indent"
         editor.text = TEXT
         yield editor
-        yield Footer(Static("Ctrl+S | Save"), Static("Ctrl+C | Exit"))
+        yield Static("Ctrl+S - Save" + " | " + "Ctrl+C - Exit")
+        yield Footer()
 
     def _on_key(self, event):
         self.query_one("#status").update(FILE + "*")

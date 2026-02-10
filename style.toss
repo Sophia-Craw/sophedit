@@ -2,6 +2,6 @@ SaveDialog {
     display: none;
 }
 
-Static {
+#status {
     text-align: center;
 }
